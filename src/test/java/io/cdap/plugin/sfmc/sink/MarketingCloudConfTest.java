@@ -44,7 +44,8 @@ public class MarketingCloudConfTest {
     SourceObject object = SourceObject.DATA_EXTENSION;
     MarketingCloudConf config = new MarketingCloudConf("referenceName", CLIENT_ID,
                                                        CLIENT_SECRET, "DE", AUTH_ENDPOINT,
-                                                       SOAP_ENDPOINT, 500, null, "<key=value>",
+                                                       SOAP_ENDPOINT, 500, null,
+                                                       "<key=value>",
                                                        true, true, true);
     Assert.assertEquals("referenceName", config.getReferenceName());
     Assert.assertEquals(500, config.getMaxBatchSize());
@@ -58,14 +59,14 @@ public class MarketingCloudConfTest {
   }
 
   @Test
-  public void testValidateReferenceName() {
+  public void testValidateReferenceName() throws ETSdkException {
     MarketingCloudConf config = MarketingCloudConfHelper.newConfigBuilder().setReferenceName(TEST_REF_NAME)
       .build();
     Assert.assertEquals("TestRefName", config.getReferenceName());
   }
 
   @Test
-  public void testValidate() {
+  public void testValidate() throws ETSdkException {
     MockFailureCollector collector = new MockFailureCollector();
     MarketingCloudConf config = withSalesforceValidationMock(MarketingCloudConfHelper.newConfigBuilder()
                                                                .setClientId(CLIENT_ID)
@@ -79,7 +80,7 @@ public class MarketingCloudConfTest {
   }
 
   @Test
-  public void testMaxBatchSizeWhenProvidedNull() {
+  public void testMaxBatchSizeWhenProvidedNull() throws ETSdkException {
     MarketingCloudConf config = MarketingCloudConfHelper.newConfigBuilder()
       .setMaxBatchSize(null)
       .build();
@@ -107,13 +108,14 @@ public class MarketingCloudConfTest {
       collector.getOrThrowException();
       Assert.fail("Batch Size is invalid");
     } catch (ValidationException e) {
-      Assert.assertEquals("The value should not be less than 0", "Errors were encountered during validation.",
+      Assert.assertEquals("The value should not be less than 0", "Errors were encountered during " +
+                            "validation. Error while validating Marketing Cloud client: authEndPoint/v2/token: bad URL",
                           e.getMessage());
     }
   }
 
   @Test
-  public void testOperationNull() {
+  public void testOperationNull() throws ETSdkException {
     MarketingCloudConf config = MarketingCloudConfHelper.newConfigBuilder()
       .setOperation(null)
       .build();
@@ -123,7 +125,7 @@ public class MarketingCloudConfTest {
   }
 
   @Test
-  public void testOperationUpdate() {
+  public void testOperationUpdate() throws ETSdkException {
     Operation operation = Operation.UPDATE;
     MarketingCloudConf config = MarketingCloudConfHelper.newConfigBuilder()
       .setOperation("UPDATE")
@@ -134,7 +136,7 @@ public class MarketingCloudConfTest {
   }
 
   @Test
-  public void testGetInvalidColumnMapping() {
+  public void testGetInvalidColumnMapping() throws ETSdkException {
     Schema inputSchema = Schema.recordOf("record",
                                          Schema.Field.of("storeid", Schema.of(Schema.Type.STRING)),
                                          Schema.Field.of("emailid", Schema.of(Schema.Type.STRING)));
@@ -146,7 +148,8 @@ public class MarketingCloudConfTest {
       Assert.fail("Invalid ColumnMapping");
     } catch (ValidationException e) {
       Assert.assertEquals(1, e.getFailures().size());
-      Assert.assertEquals("Errors were encountered during validation.", e.getMessage());
+      Assert.assertEquals("Errors were encountered during validation. Invalid column mapping: columnMapping",
+                          e.getMessage());
     }
   }
 
@@ -158,8 +161,9 @@ public class MarketingCloudConfTest {
     MockFailureCollector collector = new MockFailureCollector();
     MarketingCloudConf config = new MarketingCloudConf("referenceName", CLIENT_ID,
                                                        CLIENT_SECRET, "DE", AUTH_ENDPOINT,
-                                                       SOAP_ENDPOINT, 500, null, "column=mapping",
-                                                       null, null, null);
+                                                       SOAP_ENDPOINT, 500, null,
+                                                       "column=mapping", null,
+                                                       null, null);
     config.shouldFailOnError();
     config.shouldTruncateText();
     config.shouldReplaceWithSpaces();
